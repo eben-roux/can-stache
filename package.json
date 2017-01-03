@@ -48,7 +48,7 @@
     "can-view-target": "^3.0.4"
   },
   "devDependencies": {
-    "can-define": "^1.0.5",
+    "can-define": "^1.0.11",
     "can-event": "^3.0.1",
     "can-list": "^3.0.1",
     "can-map": "^3.0.3",
