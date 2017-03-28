@@ -5,7 +5,7 @@ var DefineList = require("can-define/list/list");
 
 QUnit.module("can-stache with can-define");
 
-test("basic replacement and updating", function(){
+test("basic replacement and updating", function() {
 
 	var map = new DefineMap({
 		message: "World"
@@ -15,28 +15,28 @@ test("basic replacement and updating", function(){
 
 	var frag = stashed(map);
 
-	equal( frag.firstChild.firstChild.nodeValue, "World","got back the right text");
+	equal(frag.firstChild.firstChild.nodeValue, "World", "got back the right text");
 });
 
 
-test('Helper each inside a text section (attribute) (#8)', function(assert){
+test('Helper each inside a text section (attribute) (#8)', function(assert) {
 	var template = stache('<div class="{{#each list}}{{.}} {{/}}"></div>');
 
 	var vm = new DefineMap({
-		list: new DefineList(['one','two'])
+		list: new DefineList([ 'one', 'two' ])
 	});
 	var frag = template(vm);
 	var className = frag.firstChild.className;
 
-	assert.equal( className, 'one two ' );
+	assert.equal(className, 'one two ');
 
 	vm.list.push('three');
 	className = frag.firstChild.className;
 
-	assert.equal( className, 'one two three ' );
+	assert.equal(className, 'one two three ');
 });
 
-test("Using #each on a DefineMap", function(assert){
+test("Using #each on a DefineMap", function(assert) {
 	var template = stache("{{#each obj}}{{%key}}{{.}}{{/each}}");
 
 	var VM = DefineMap.extend({
@@ -67,11 +67,12 @@ test("Using #each on a DefineMap", function(assert){
 	assert.equal(third.nextSibling.nodeValue, "qux");
 });
 
-QUnit.test("{{%index}} and {{@index}} work with {{#key}} iteration", function () {
-	var template = stache('<p>{{#iter}}<span>{{@index}}</span>{{/iter}}</p> '+
-	  					   '<p>{{#iter}}<span>{{%index}}</span>{{/iter}}</p>');
+QUnit.test("{{%index}} and {{@index}} work with {{#key}} iteration", function() {
+	var template = stache('' +
+		'<p>{{#iter}}<span>{{@index}}</span>{{/iter}}</p> ' +
+		'<p>{{#iter}}<span>{{%index}}</span>{{/iter}}</p>');
 	var div = document.createElement('div');
-	var dom = template({iter: new DefineList(['hey', 'there'])});
+	var dom = template({ iter: new DefineList([ 'hey', 'there' ]) });
 	div.appendChild(dom);
 
 	var span = div.getElementsByTagName('span');
@@ -81,11 +82,11 @@ QUnit.test("{{%index}} and {{@index}} work with {{#key}} iteration", function ()
 	equal((span[3].innerHTML), '1', 'iteration for %index');
 });
 
-QUnit.test("iterate a DefineMap with {{#each}} (#can-define/125)", function(){
+QUnit.test("iterate a DefineMap with {{#each}} (#can-define/125)", function() {
 	var template = stache('<p>{{#each iter}}<span>{{%key}} {{.}}</span>{{/each}}</p>');
 	var div = document.createElement('div');
 
-	var dom = template({iter: new DefineMap({first: "justin", last: "meyer"})});
+	var dom = template({ iter: new DefineMap({ first: "justin", last: "meyer" }) });
 	div.appendChild(dom);
 
 	var span = div.getElementsByTagName('span');

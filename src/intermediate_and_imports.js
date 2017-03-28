@@ -2,7 +2,7 @@ var mustacheCore = require('./mustache_core');
 var parser = require('can-view-parser');
 // require('can/view/import/import');
 
-module.exports = function(source){
+module.exports = function(source) {
 
 	var template = mustacheCore.cleanLineEndings(source);
 	var imports = [],
@@ -16,50 +16,50 @@ module.exports = function(source){
 		currentFrom = "";
 
 	var intermediate = parser(template, {
-		start: function( tagName, unary ){
+		start: function(tagName, unary) {
 			isUnary = unary;
-			if(tagName === "can-import") {
+			if (tagName === "can-import") {
 				inImport = true;
-			} else if(inImport) {
+			} else if (inImport) {
 				inImport = false;
 			}
 		},
-		attrStart: function( attrName ){
-			if(attrName === "from") {
+		attrStart: function(attrName) {
+			if (attrName === "from") {
 				inFrom = true;
-			} else if(attrName === "as" || attrName === "export-as") {
+			} else if (attrName === "as" || attrName === "export-as") {
 				inAs = true;
 			}
 		},
-		attrEnd: function( attrName ){
-			if(attrName === "from") {
+		attrEnd: function(attrName) {
+			if (attrName === "from") {
 				inFrom = false;
-			} else if(attrName === "as" || attrName === "export-as") {
+			} else if (attrName === "as" || attrName === "export-as") {
 				inAs = false;
 			}
 		},
-		attrValue: function( value ){
-			if(inFrom && inImport) {
+		attrValue: function(value) {
+			if (inFrom && inImport) {
 				imports.push(value);
-				if(!isUnary) {
+				if (!isUnary) {
 					dynamicImports.push(value);
 				}
 				currentFrom = value;
-			} else if(inAs && inImport) {
+			} else if (inAs && inImport) {
 				currentAs = value;
 			}
 		},
-		end: function(tagName){
-			if(tagName === "can-import") {
+		end: function(tagName) {
+			if (tagName === "can-import") {
 				// Set the as value to the from
-				if(currentAs) {
+				if (currentAs) {
 					ases[currentAs] = currentFrom;
 					currentAs = "";
 				}
 			}
 		},
-		close: function(tagName){
-			if(tagName === "can-import") {
+		close: function(tagName) {
+			if (tagName === "can-import") {
 				imports.pop();
 			}
 		}

@@ -28,7 +28,7 @@ var attr = require("can-util/dom/attr/attr");
 // ## Helpers
 
 var mustacheLineBreakRegExp = /(?:(?:^|(\r?)\n)(\s*)(\{\{([^\}]*)\}\}\}?)([^\S\n\r]*)($|\r?\n))|(\{\{([^\}]*)\}\}\}?)/g,
-	k = function(){};
+	k = function() {};
 
 
 var core = {
@@ -52,9 +52,9 @@ var core = {
 	 * @param {String} [stringOnly] A flag to indicate that only strings will be returned by subsections.
 	 * @return {Function} An 'evaluator' function that evaluates the expression.
 	 */
-	makeEvaluator: function (scope, helperOptions, nodeList, mode, exprData, truthyRenderer, falseyRenderer, stringOnly) {
+	makeEvaluator: function(scope, helperOptions, nodeList, mode, exprData, truthyRenderer, falseyRenderer, stringOnly) {
 
-		if(mode === "^") {
+		if (mode === "^") {
 			var temp = truthyRenderer;
 			truthyRenderer = falseyRenderer;
 			falseyRenderer = temp;
@@ -63,37 +63,37 @@ var core = {
 		var value,
 			helperOptionArg;
 
-		if(exprData instanceof expression.Call) {
+		if (exprData instanceof expression.Call) {
 			helperOptionArg =  {
-				fn: function () {},
-				inverse: function () {},
+				fn: function() {},
+				inverse: function() {},
 				context: scope.peek("."),
 				scope: scope,
 				nodeList: nodeList,
 				exprData: exprData,
 				helpersScope: helperOptions
 			};
-			utils.convertToScopes(helperOptionArg, scope,helperOptions, nodeList, truthyRenderer, falseyRenderer, stringOnly);
+			utils.convertToScopes(helperOptionArg, scope, helperOptions, nodeList, truthyRenderer, falseyRenderer, stringOnly);
 
 			value = exprData.value(scope, helperOptions, helperOptionArg);
-			if(exprData.isHelper) {
+			if (exprData.isHelper) {
 				return value;
 			}
 		} else if (exprData instanceof expression.Bracket) {
 			value = exprData.value(scope);
-			if(exprData.isHelper) {
+			if (exprData.isHelper) {
 				return value;
 			}
 		} else if (exprData instanceof expression.Lookup) {
 			value = exprData.value(scope);
-			if(exprData.isHelper) {
+			if (exprData.isHelper) {
 				return value;
 			}
 		} else if (exprData instanceof expression.Helper && exprData.methodExpr instanceof expression.Bracket) {
 			// Brackets get wrapped in Helpers when used in attributes
 			// like `<p class="{{ foo[bar] }}" />`
 			value = exprData.methodExpr.value(scope);
-			if(exprData.isHelper) {
+			if (exprData.isHelper) {
 				return value;
 			}
 		} else {
@@ -101,39 +101,39 @@ var core = {
 				// will return a function instead of calling it.
 				// allowing it to be turned into a compute if necessary.
 				isArgument: true,
-				args: [scope.peek('.'), scope],
+				args: [ scope.peek('.'), scope ],
 				asCompute: true
 			};
 			var helperAndValue = exprData.helperAndValue(scope, helperOptions, readOptions, nodeList, truthyRenderer, falseyRenderer, stringOnly);
 			var helper = helperAndValue.helper;
 			value = helperAndValue.value;
 
-			if(helper) {
+			if (helper) {
 				return exprData.evaluator(helper, scope, helperOptions, readOptions, nodeList, truthyRenderer, falseyRenderer, stringOnly);
 			}
 		}
 
 		// Return evaluators for no mode.
-		if(!mode) {
+		if (!mode) {
 			// If it's computed, return a function that just reads the compute.
-			if(value && value.isComputed) {
+			if (value && value.isComputed) {
 				return value;
 			}
 			// Just return value as the value
 			else {
 
-				return function(){
+				return function() {
 					return '' + (value != null ? value : '');
 				};
 			}
-		} else if( mode === "#" || mode === "^" ) {
+		} else if (mode === "#" || mode === "^") {
 			// Setup renderers.
 			helperOptionArg = {
-				fn: function () {},
-				inverse: function () {}
+				fn: function() {},
+				inverse: function() {}
 			};
 			utils.convertToScopes(helperOptionArg, scope, helperOptions, nodeList, truthyRenderer, falseyRenderer, stringOnly);
-			return function(){
+			return function() {
 				// Get the value
 				var finalValue;
 				if (types.isCompute(value)) {
@@ -141,14 +141,14 @@ var core = {
 				} else {
 					finalValue = value;
 				}
-				if(typeof finalValue === "function") {
+				if (typeof finalValue === "function") {
 					return finalValue;
 				}
 				// If it's an array, render.
-				else if ( typeof finalValue !== "string" && utils.isArrayLike(finalValue) ) {
+				else if (typeof finalValue !== "string" && utils.isArrayLike(finalValue)) {
 					var isObserveList = types.isMapLike(finalValue);
 
-					if(isObserveList ? finalValue.attr("length") : finalValue.length) {
+					if (isObserveList ? finalValue.attr("length") : finalValue.length) {
 						if (stringOnly) {
 							return utils.getItemsStringContent(finalValue, isObserveList, helperOptionArg, helperOptions);
 						} else {
@@ -177,31 +177,31 @@ var core = {
 	 * @return {function(this:HTMLElement,can-view-scope,can.view.Options)} A renderer function
 	 * live binds a partial.
 	 */
-	makeLiveBindingPartialRenderer: function(expressionString, state){
+	makeLiveBindingPartialRenderer: function(expressionString, state) {
 		expressionString = expressionString.trim();
 		var exprData,
 				partialName = expressionString.split(/\s+/).shift();
 
-		if(partialName !== expressionString) {
+		if (partialName !== expressionString) {
 			exprData = core.expression.parse(expressionString);
 		}
 
-		return function(scope, options, parentSectionNodeList){
-			var nodeList = [this];
+		return function(scope, options, parentSectionNodeList) {
+			var nodeList = [ this ];
 			nodeList.expression = ">" + partialName;
 			nodeLists.register(nodeList, null, parentSectionNodeList || true, state.directlyNested);
 
-			var partialFrag = compute(function(){
+			var partialFrag = compute(function() {
 				var localPartialName = partialName;
 				// If the second parameter of a partial is a custom context
-				if(exprData && exprData.argExprs.length === 1) {
+				if (exprData && exprData.argExprs.length === 1) {
 					var newContext = exprData.argExprs[0].value(scope, options)();
-					if(typeof newContext === "undefined") {
+					if (typeof newContext === "undefined") {
 						//!steal-remove-start
-						dev.warn('The context ('+ exprData.argExprs[0].key +') you passed into the' +
-							'partial ('+ partialName +') is not defined in the scope!');
+						dev.warn('The context (' + exprData.argExprs[0].key + ') you passed into the' +
+							'partial (' + partialName + ') is not defined in the scope!');
 						//!steal-remove-end
-					}else{
+					} else {
 						scope = scope.add(newContext);
 					}
 				}
@@ -209,8 +209,8 @@ var core = {
 				var partial = options.peek("partials." + localPartialName), renderer;
 				if (partial) {
 					renderer = function() {
-						return partial.render ? partial.render(scope, options, nodeList)
-							: partial(scope, options);
+						return partial.render ? partial.render(scope, options, nodeList) :
+							partial(scope, options);
 					};
 				}
 				// Use can.view to get and render the partial.
@@ -227,7 +227,7 @@ var core = {
 					}
 
 					renderer = function() {
-						if(typeof localPartialName === "function"){
+						if (typeof localPartialName === "function") {
 							return localPartialName(scope, options, nodeList);
 						} else {
 							return core.getTemplateById(localPartialName)(scope, options, nodeList);
@@ -254,30 +254,30 @@ var core = {
 	 * @param {can.stache.Expression} expression
 	 * @return {function(can.view.Scope,can.view.Options, can-stache.renderer, can.view.renderer)}
 	 */
-	makeStringBranchRenderer: function(mode, expressionString){
+	makeStringBranchRenderer: function(mode, expressionString) {
 		var exprData = core.expression.parse(expressionString),
 			// Use the full mustache expression as the cache key.
-			fullExpression = mode+expressionString;
+			fullExpression = mode + expressionString;
 
 		// convert a lookup like `{{value}}` to still be called as a helper if necessary.
-		if(!(exprData instanceof expression.Helper) && !(exprData instanceof expression.Call)) {
-			exprData = new expression.Helper(exprData,[],{});
+		if (!(exprData instanceof expression.Helper) && !(exprData instanceof expression.Call)) {
+			exprData = new expression.Helper(exprData, [], {});
 		}
 
 		// A branching renderer takes truthy and falsey renderer.
-		return function branchRenderer(scope, options, truthyRenderer, falseyRenderer){
+		return function branchRenderer(scope, options, truthyRenderer, falseyRenderer) {
 			// Check the scope's cache if the evaluator already exists for performance.
 			var evaluator = scope.__cache[fullExpression];
-			if(mode || !evaluator) {
-				evaluator = makeEvaluator( scope, options, null, mode, exprData, truthyRenderer, falseyRenderer, true);
-				if(!mode) {
+			if (mode || !evaluator) {
+				evaluator = makeEvaluator(scope, options, null, mode, exprData, truthyRenderer, falseyRenderer, true);
+				if (!mode) {
 					scope.__cache[fullExpression] = evaluator;
 				}
 			}
 
 			// Run the evaluator and return the result.
 			var res = evaluator();
-			return res == null ? "" : ""+res;
+			return res == null ? "" : "" + res;
 		};
 	},
 	// ## mustacheCore.makeLiveBindingBranchRenderer
@@ -295,17 +295,21 @@ var core = {
 	 * @param {can.stache.Expression} expression
 	 * @param {Object} state The html state of where the expression was found.
 	 */
-	makeLiveBindingBranchRenderer: function(mode, expressionString, state){
+	makeLiveBindingBranchRenderer: function(mode, expressionString, state) {
 
 		// Pre-process the expression.
 		var exprData = core.expression.parse(expressionString);
-		if(!(exprData instanceof expression.Helper) && !(exprData instanceof expression.Call) && !(exprData instanceof expression.Bracket) && !(exprData instanceof expression.Lookup)) {
-			exprData = new expression.Helper(exprData,[],{});
+		if (!(exprData instanceof expression.Helper) &&
+			!(exprData instanceof expression.Call) &&
+			!(exprData instanceof expression.Bracket) &&
+			!(exprData instanceof expression.Lookup)
+		) {
+			exprData = new expression.Helper(exprData, [], {});
 		}
 		// A branching renderer takes truthy and falsey renderer.
-		return function branchRenderer(scope, options, parentSectionNodeList, truthyRenderer, falseyRenderer){
+		return function branchRenderer(scope, options, parentSectionNodeList, truthyRenderer, falseyRenderer) {
 
-			var nodeList = [this];
+			var nodeList = [ this ];
 			nodeList.expression = expressionString;
 			// register this nodeList.
 			// Regsiter it with its parent ONLY if this is directly nested.  Otherwise, it's unencessary.
@@ -314,9 +318,9 @@ var core = {
 
 			// Get the evaluator. This does not need to be cached (probably) because if there
 			// an observable value, it will be handled by `can.view.live`.
-			var evaluator = makeEvaluator( scope, options, nodeList, mode, exprData, truthyRenderer, falseyRenderer,
+			var evaluator = makeEvaluator(scope, options, nodeList, mode, exprData, truthyRenderer, falseyRenderer,
 				// If this is within a tag, make sure we only get string values.
-				state.tag );
+				state.tag);
 
 			// Create a compute that can not be observed by other
 			// comptues. This is important because this renderer is likely called by
@@ -326,7 +330,7 @@ var core = {
 			//var compute = can.compute(evaluator, null, false);
 			var gotCompute = evaluator.isComputed,
 				computeValue;
-			if(gotCompute) {
+			if (gotCompute) {
 				computeValue = evaluator;
 			} else {
 				computeValue = compute(evaluator, null, false);
@@ -341,7 +345,7 @@ var core = {
 			var value = computeValue();
 
 			// If value is a function, it's a helper that returned a function.
-			if(typeof value === "function") {
+			if (typeof value === "function") {
 
 				// A helper function should do it's own binding.  Similar to how
 				// we prevented this function's compute from being noticed by parent expressions,
@@ -352,36 +356,30 @@ var core = {
 
 			}
 			// If the computeValue has observable dependencies, setup live binding.
-			else if(gotCompute || computeValue.computeInstance.hasDependencies ) {
+			else if (gotCompute || computeValue.computeInstance.hasDependencies) {
 
 				// Depending on where the template is, setup live-binding differently.
-				if(state.attr) {
+				if (state.attr) {
 					live.attr(this, state.attr, computeValue);
-				}
-				else if( state.tag )  {
-					live.attrs( this, computeValue );
-				}
-				else if(state.text && typeof value !== "object"){
+				}				else if (state.tag)  {
+					live.attrs(this, computeValue);
+				}				else if (state.text && typeof value !== "object") {
 					live.text(this, computeValue, this.parentNode, nodeList);
-				}
-				else {
+				}				else {
 					live.html(this, computeValue, this.parentNode, nodeList);
 				}
 			}
 			// If the computeValue has no observable dependencies, just set the value on the element.
 			else {
 
-				if(state.attr) {
+				if (state.attr) {
 					attr.set(this, state.attr, value);
-				}
-				else if(state.tag) {
+				}				else if (state.tag) {
 					live.attrs(this, value);
-				}
-				else if(state.text && typeof value === "string") {
+				}				else if (state.text && typeof value === "string") {
 					this.nodeValue = value;
-				}
-				else if( value != null ){
-					nodeLists.replace([this], frag(value, this.ownerDocument));
+				}				else if (value != null) {
+					nodeLists.replace([ this ], frag(value, this.ownerDocument));
 				}
 			}
 			// Unbind the compute.
@@ -396,17 +394,17 @@ var core = {
 	 * @param {can.stache.Expression} expression
 	 * @param {Object} state The state of HTML where the expression was found.
 	 */
-	splitModeFromExpression: function(expression, state){
+	splitModeFromExpression: function(expression, state) {
 		expression = expression.trim();
 		var mode = expression.charAt(0);
 
-		if( "#/{&^>!".indexOf(mode) >= 0 ) {
+		if ("#/{&^>!".indexOf(mode) >= 0) {
 			expression =  expression.substr(1).trim();
 		} else {
 			mode = null;
 		}
 		// Triple braces do nothing within a tag.
-		if(mode === "{" && state.node) {
+		if (mode === "{" && state.node) {
 			mode = null;
 		}
 		return {
@@ -422,10 +420,10 @@ var core = {
 	 * @param {String} template
 	 * @return {String}
 	 */
-	cleanLineEndings: function(template){
+	cleanLineEndings: function(template) {
 
 		// Finds mustache tags with space around them or no space around them.
-		return template.replace( mustacheLineBreakRegExp,
+		return template.replace(mustacheLineBreakRegExp,
 			function(whole,
 				returnBefore,
 				spaceBefore,
@@ -436,34 +434,34 @@ var core = {
 				// A mustache magic tag that has no space around it.
 				spaceLessSpecial,
 				spaceLessExpression,
-				matchIndex){
+				matchIndex) {
 
 			// IE 8 will provide undefined
 			spaceAfter = (spaceAfter || "");
 			returnBefore = (returnBefore || "");
 			spaceBefore = (spaceBefore || "");
 
-			var modeAndExpression = splitModeFromExpression(expression || spaceLessExpression,{});
+			var modeAndExpression = splitModeFromExpression(expression || spaceLessExpression, {});
 
 			// If it's a partial or tripple stache, leave in place.
-			if(spaceLessSpecial || ">{".indexOf( modeAndExpression.mode) >= 0) {
+			if (spaceLessSpecial || ">{".indexOf(modeAndExpression.mode) >= 0) {
 				return whole;
-			}  else if( "^#!/".indexOf(  modeAndExpression.mode ) >= 0 ) {
+			}  else if ("^#!/".indexOf(modeAndExpression.mode) >= 0) {
 
 				// Return the magic tag and a trailing linebreak if this did not
 				// start a new line and there was an end line.
-				return special+( matchIndex !== 0 && returnAfter.length ? returnBefore+"\n" :"");
+				return special + (matchIndex !== 0 && returnAfter.length ? returnBefore + "\n" : "");
 
 
 			} else {
 				// There is no mode, return special with spaces around it.
-				return spaceBefore+special+spaceAfter+(spaceBefore.length || matchIndex !== 0 ? returnBefore+"\n" : "");
+				return spaceBefore + special + spaceAfter + (spaceBefore.length || matchIndex !== 0 ? returnBefore + "\n" : "");
 			}
 
 		});
 	},
 	Options: utils.Options,
-	getTemplateById: function(){}
+	getTemplateById: function() {}
 };
 
 // ## Local Variable Cache

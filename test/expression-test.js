@@ -9,7 +9,7 @@ var helpers = require('../helpers/converter');
 QUnit.module("can-stache/src/expression");
 
 
-test("expression.tokenize", function(){
+test("expression.tokenize", function() {
 	var literals = "'quote' \"QUOTE\" 1 undefined null true false 0.1";
 	var res = expression.tokenize(literals);
 
@@ -29,11 +29,11 @@ test("expression.tokenize", function(){
 
 	var bracket = "[foo] bar [baz]";
 	res = expression.tokenize(bracket);
-	deepEqual(res, ["[", "foo", "]", " ", "bar", " ", "[", "baz", "]", " "]);
+	deepEqual(res, [ "[", "foo", "]", " ", "bar", " ", "[", "baz", "]", " " ]);
 
 });
 
-test("expression.ast - helper followed by hash", function(){
+test("expression.ast - helper followed by hash", function() {
 	var ast = expression.ast("print_hash prop=own_prop");
 
 	deepEqual(ast, {
@@ -49,7 +49,7 @@ test("expression.ast - helper followed by hash", function(){
 					{
 						type: "Hash",
 						prop: "prop",
-						children: [{type: "Lookup", key: "own_prop"}]
+						children: [ { type: "Lookup", key: "own_prop" } ]
 					}
 				]
 			}
@@ -58,39 +58,39 @@ test("expression.ast - helper followed by hash", function(){
 
 });
 
-test("expression.ast - everything", function(){
+test("expression.ast - everything", function() {
 	var ast = expression.ast("helperA helperB(1, valueA, propA=~valueB propC=2, 1).zed() 'def' nested@prop outerPropA=helperC(2,valueB)");
 
 	var helperBCall = {
 		type: "Call",
-		method: {type: "Lookup", key: "@helperB"},
+		method: { type: "Lookup", key: "@helperB" },
 		children: [
-			{type: "Literal", value: 1},
-			{type: "Lookup", key: "valueA"},
+			{ type: "Literal", value: 1 },
+			{ type: "Lookup", key: "valueA" },
 			{
 				type: "Hashes",
 				children: [
 					{
 						type: "Hash",
 						prop: "propA",
-						children: [{type: "Arg", key: "~", children: [{type: "Lookup", key: "valueB"} ]}]
+						children: [ { type: "Arg", key: "~", children: [ { type: "Lookup", key: "valueB" } ] } ]
 					},
 					{
 						type: "Hash",
 						prop: "propC",
-						children: [{type: "Literal", value: 2}]
+						children: [ { type: "Literal", value: 2 } ]
 					}
 				]
 			},
-			{type: "Literal", value: 1}
+			{ type: "Literal", value: 1 }
 		]
 	};
 	var helperCCall = {
 		type: "Call",
-		method: {type: "Lookup", key: "@helperC"},
+		method: { type: "Lookup", key: "@helperC" },
 		children: [
-			{type: "Literal", value: 2},
-			{type: "Lookup", key: "valueB"}
+			{ type: "Literal", value: 2 },
+			{ type: "Lookup", key: "valueB" }
 		]
 	};
 
@@ -109,15 +109,15 @@ test("expression.ast - everything", function(){
 					key: "@zed"
 				}
 			},
-			{type: "Literal", value: 'def'},
-			{type: "Lookup", key: "nested@prop"},
+			{ type: "Literal", value: 'def' },
+			{ type: "Lookup", key: "nested@prop" },
 			{
 				type: "Hashes",
 				children: [
 					{
 						type: "Hash",
 						prop: "outerPropA",
-						children: [helperCCall]
+						children: [ helperCCall ]
 					}
 				]
 			}
@@ -125,7 +125,7 @@ test("expression.ast - everything", function(){
 	});
 });
 
-test("expression.parse - everything", function(){
+test("expression.parse - everything", function() {
 
 	var exprData = expression.parse("helperA helperB(1, valueA, propA=~valueB propC=2, 1).zed 'def' nested@prop outerPropA=helperC(2,valueB)");
 
@@ -142,26 +142,26 @@ test("expression.parse - everything", function(){
 		helperC = new expression.Lookup("@helperC");
 
 	var helperBHashArg = new expression.Hashes({
-		propA: new expression.Arg(valueB, {compute: true}),
+		propA: new expression.Arg(valueB, { compute: true }),
 		propC: twoExpr
 	});
 
 	var callHelperB = new expression.Call(
 		helperB,
-		[oneExpr, valueA, helperBHashArg, oneExpr]
+		[ oneExpr, valueA, helperBHashArg, oneExpr ]
 	);
 
 	var callHelperBdotZed = new expression.ScopeLookup("zed", callHelperB);
 
 	var callHelperC = new expression.Call(
 		helperC,
-		[twoExpr, valueB],
+		[ twoExpr, valueB ],
 		{}
 	);
 
 	var callHelperA = new expression.Helper(
 		helperA,
-		[callHelperBdotZed, def, nested],
+		[ callHelperBdotZed, def, nested ],
 		{
 			outerPropA: callHelperC
 		}
@@ -173,17 +173,16 @@ test("expression.parse - everything", function(){
 
 	deepEqual(callHelperBdotZed, exprData.argExprs[0], "call helper b.zed");
 
-	var expectedArgs = [callHelperBdotZed, def, nested];
-	each(exprData.argExprs, function(arg, i){
-		deepEqual(arg, expectedArgs[i], "helperA arg["+i);
+	var expectedArgs = [ callHelperBdotZed, def, nested ];
+	each(exprData.argExprs, function(arg, i) {
+		deepEqual(arg, expectedArgs[i], "helperA arg[" + i);
 	});
 
 
-	deepEqual( exprData, callHelperA, "full thing");
+	deepEqual(exprData, callHelperA, "full thing");
 });
 
-test("expression.parse(str, {lookupRule: 'method', methodRule: 'call'})",
-		 function(){
+test("expression.parse(str, {lookupRule: 'method', methodRule: 'call'})", function() {
 
 	var exprData = expression.parse("withArgs content=content", {
 		lookupRule: "method",
@@ -199,26 +198,26 @@ test("expression.parse(str, {lookupRule: 'method', methodRule: 'call'})",
 	deepEqual(exprData.argExprs[0], hashArg, "correct hashes");
 });
 
-test("numeric expression.Literal", function(){
+test("numeric expression.Literal", function() {
 	var exprData = expression.parse("3");
 
 	var result = new expression.Literal(3);
-	deepEqual( exprData, result);
+	deepEqual(exprData, result);
 
 });
 
-test("expression.Helper:value non-observable values", function(){
+test("expression.Helper:value non-observable values", function() {
 	// {{fullName 'marshall' 'thompson'}}
 
 	var scope = new Scope({
-		fullName: function(first, last){
-			return first+" "+last;
+		fullName: function(first, last) {
+			return first + " " + last;
 		}
 	});
 
 	var callFullName = new expression.Helper(
 		new expression.HelperLookup("fullName"),
-		[new expression.Literal('marshall'), new expression.Literal('thompson')],
+		[ new expression.Literal('marshall'), new expression.Literal('thompson') ],
 		{}
 	);
 
@@ -227,142 +226,142 @@ test("expression.Helper:value non-observable values", function(){
 	equal(result, "marshall thompson");
 });
 
-test("expression.Helper:value observable values", function(){
+test("expression.Helper:value observable values", function() {
 	// {{fullName first 'thompson'}}
 
 	var scope = new Scope({
-		fullName: function(first, last){
-			return first()+" "+last;
+		fullName: function(first, last) {
+			return first() + " " + last;
 		},
 		first: canCompute("marshall")
 	});
 
 	var callFullName = new expression.Helper(
 		new expression.HelperLookup("fullName"),
-		[new expression.HelperLookup("first"), new expression.Literal('thompson')],
+		[ new expression.HelperLookup("first"), new expression.Literal('thompson') ],
 		{}
 	);
 
-	var result = callFullName.value(scope, new Scope({}) );
+	var result = callFullName.value(scope, new Scope({}));
 
 	equal(result(), "marshall thompson");
 });
 
-test("methods can return values (#1887)", function(){
+test("methods can return values (#1887)", function() {
 	var MyMap = CanMap.extend({
-		getSomething: function(arg){
+		getSomething: function(arg) {
 			return this.attr("foo") + arg();
 		}
 	});
 
 	var scope =
-		new Scope(new MyMap({foo: 2, bar: 3}))
+		new Scope(new MyMap({ foo: 2, bar: 3 }))
 			.add({});
 
 	var callGetSomething = new expression.Helper(
 		new expression.HelperLookup("getSomething"),
-		[new expression.ScopeLookup("bar")],
+		[ new expression.ScopeLookup("bar") ],
 		{}
 	);
 
-	var result = callGetSomething.value(scope, new Scope({}), {asCompute: true});
+	var result = callGetSomething.value(scope, new Scope({}), { asCompute: true });
 
 	equal(result(), 5);
 });
 
-test("methods don't update correctly (#1891)", function(){
+test("methods don't update correctly (#1891)", function() {
 	var map = new CanMap({
-	  num: 1,
-	  num2: function () {
-	    return this.attr('num') * 2;
-	  },
-	  runTest: function () {
-	    this.attr('num', this.attr('num') * 2);
-	  }
+		num: 1,
+		num2: function() {
+			return this.attr('num') * 2;
+		},
+		runTest: function() {
+			this.attr('num', this.attr('num') * 2);
+		}
 	});
 
 	var scope =
 		new Scope(map);
 
 	var num2Expression = new expression.Lookup("num2");
-	var num2 = num2Expression.value( scope, new Scope({}), {asCompute: true} );
+	var num2 = num2Expression.value(scope, new Scope({}), { asCompute: true });
 
-	num2.bind("change", function(ev, newVal){
+	num2.bind("change", function(ev, newVal) {
 
 	});
 
 	map.runTest();
 
-	equal( num2(), 4, "num2 updated correctly");
+	equal(num2(), 4, "num2 updated correctly");
 
 });
 
-test("call expressions called with different scopes give different results (#1791)", function(){
+test("call expressions called with different scopes give different results (#1791)", function() {
 	var exprData = expression.parse("doSomething(number)");
 
 	var res = exprData.value(new Scope({
-		doSomething: function(num){
-			return num*2;
+		doSomething: function(num) {
+			return num * 2;
 		},
 		number: canCompute(2)
 	}));
 
-	equal( res(), 4);
+	equal(res(), 4);
 
 	res = exprData.value(new Scope({
-		doSomething: function(num){
-			return num*3;
+		doSomething: function(num) {
+			return num * 3;
 		},
 		number: canCompute(4)
 	}));
 
-	equal( res(), 12);
+	equal(res(), 12);
 });
 
-test("convertKeyToLookup", function(){
+test("convertKeyToLookup", function() {
 
-	equal( expression.convertKeyToLookup("../foo"), "../@foo" );
-	equal( expression.convertKeyToLookup("foo"), "@foo" );
-	equal( expression.convertKeyToLookup(".foo"), "@foo" );
-	equal( expression.convertKeyToLookup("./foo"), "./@foo" );
-	equal( expression.convertKeyToLookup("foo.bar"), "foo@bar" );
+	equal(expression.convertKeyToLookup("../foo"), "../@foo");
+	equal(expression.convertKeyToLookup("foo"), "@foo");
+	equal(expression.convertKeyToLookup(".foo"), "@foo");
+	equal(expression.convertKeyToLookup("./foo"), "./@foo");
+	equal(expression.convertKeyToLookup("foo.bar"), "foo@bar");
 
 });
 
 
-test("expression.ast - [] operator", function(){
+test("expression.ast - [] operator", function() {
 	deepEqual(expression.ast("['propName']"), {
 		type: "Bracket",
-		children: [{type: "Literal", value: "propName"}]
+		children: [ { type: "Literal", value: "propName" } ]
 	}, "['propName'] valid");
 
 	deepEqual(expression.ast("[propName]"), {
-    	type: "Bracket",
-    	children: [{type: "Lookup", key: "propName"}]
+		type: "Bracket",
+		children: [ { type: "Lookup", key: "propName" } ]
 	}, "[propName] valid");
 
 	deepEqual(expression.ast("foo['bar']"), {
-	    type: "Bracket",
-			root: {type: "Lookup", key: "foo"},
-	    children: [{type: "Literal", value: "bar"}]
+		type: "Bracket",
+		root: { type: "Lookup", key: "foo" },
+		children: [ { type: "Literal", value: "bar" } ]
 	}, "foo['bar'] valid");
 
 	deepEqual(expression.ast("foo[bar]"), {
-	    type: "Bracket",
-			root: {type: "Lookup", key: "foo"},
-	    children: [{type: "Lookup", key: "bar"}]
+		type: "Bracket",
+		root: { type: "Lookup", key: "foo" },
+		children: [ { type: "Lookup", key: "bar" } ]
 	}, "foo[bar] valid");
 
 	deepEqual(expression.ast("foo[bar()]"), {
-    type: "Bracket",
-		root: {type: "Lookup", key: "foo"},
-    children: [{type: "Call", method: {key: "@bar", type: "Lookup" }}]
+		type: "Bracket",
+		root: { type: "Lookup", key: "foo" },
+		children: [ { type: "Call", method: { key: "@bar", type: "Lookup" } } ]
 	}, "foo[bar()] valid");
 
 	deepEqual(expression.ast("foo()[bar]"), {
 		type: "Bracket",
-		root: {type: "Call", method: {key: "@foo", type: "Lookup" } },
-		children: [{type: "Lookup", key: "bar"}]
+		root: { type: "Call", method: { key: "@foo", type: "Lookup" } },
+		children: [ { type: "Lookup", key: "bar" } ]
 	}, "foo()[bar] valid");
 
 	deepEqual(expression.ast("foo [bar]"), {
@@ -371,10 +370,10 @@ test("expression.ast - [] operator", function(){
 			type: "Lookup",
 			key: "foo"
 		},
-		children: [{
+		children: [ {
 			type: "Bracket",
-			children: [{type: "Lookup", key: "bar"}]
-		}]
+			children: [ { type: "Lookup", key: "bar" } ]
+		} ]
 	}, "foo [bar] valid");
 
 	deepEqual(expression.ast("eq foo['bar'] 'foo'"), {
@@ -383,15 +382,15 @@ test("expression.ast - [] operator", function(){
 			type: "Lookup",
 			key: "eq"
 		},
-		children: [{
+		children: [ {
 			type: "Bracket",
-			root: {type: "Lookup", key: "foo"},
-			children: [{type: "Literal", value: "bar"}]
+			root: { type: "Lookup", key: "foo" },
+			children: [ { type: "Literal", value: "bar" } ]
 		},
 		{
 			type: "Literal",
 			value: "foo"
-		}]
+		} ]
 	},
 	"eq foo['bar'] 'foo' valid"
 	);
@@ -402,25 +401,25 @@ test("expression.ast - [] operator", function(){
 			type: "Lookup",
 			key: "eq"
 		},
-		children: [{
+		children: [ {
 			type: "Bracket",
-			root: {type: "Lookup", key: "foo"},
-			children: [{type: "Lookup", key: "bar"}]
+			root: { type: "Lookup", key: "foo" },
+			children: [ { type: "Lookup", key: "bar" } ]
 		},
 		{
 			type: "Lookup",
 			key: "foo"
-		}]
+		} ]
 	}, "eq foo[bar] foo valid");
 
 	deepEqual(expression.ast("foo[bar][baz]"), {
 		type: "Bracket",
 		root: {
 				type: "Bracket",
-				root: {type: "Lookup", key: "foo"},
-				children: [{type: "Lookup", key: "bar"}]
+				root: { type: "Lookup", key: "foo" },
+				children: [ { type: "Lookup", key: "bar" } ]
 		},
-		children: [{type: "Lookup", key: "baz"}]
+		children: [ { type: "Lookup", key: "baz" } ]
 	}, "foo[bar][baz] valid");
 
 	deepEqual(expression.ast("foo[bar].baz"), {
@@ -428,8 +427,8 @@ test("expression.ast - [] operator", function(){
 		key: "baz",
 		root: {
 			type: "Bracket",
-			root: {type: "Lookup", key: "foo"},
-			children: [{type: "Lookup", key: "bar"}]
+			root: { type: "Lookup", key: "foo" },
+			children: [ { type: "Lookup", key: "bar" } ]
 		}
 	}, "foo[bar].baz");
 
@@ -439,23 +438,23 @@ test("expression.ast - [] operator", function(){
 			type: "Lookup",
 			key: "eq"
 		},
-		children: [{
+		children: [ {
 			type: "Lookup",
 			key: "baz",
 			root: {
 				type: "Bracket",
-				root: {type: "Lookup", key: "foo"},
-				children: [{type: "Lookup", key: "bar"}]
+				root: { type: "Lookup", key: "foo" },
+				children: [ { type: "Lookup", key: "bar" } ]
 			}
 		},
 		{
 			type: "Lookup",
 			key: "xyz"
-		}]
+		} ]
 	}, "eq foo[bar].baz xyz");
 });
 
-test("expression.parse - [] operator", function(){
+test("expression.parse - [] operator", function() {
 	deepEqual(expression.parse("['propName']"),
 		new expression.Bracket(
 			new expression.Literal('propName')
@@ -498,7 +497,7 @@ test("expression.parse - [] operator", function(){
 		"foo()[bar]"
 	);
 
-	exprData = expression.parse("foo[bar()]");
+	var exprData = expression.parse("foo[bar()]");
 	deepEqual(exprData,
 		new expression.Bracket(
 			new expression.Call(
@@ -510,7 +509,7 @@ test("expression.parse - [] operator", function(){
 		)
 	);
 
-	exprData = expression.parse("foo()[bar()]");
+	var exprData = expression.parse("foo()[bar()]");
 	deepEqual(exprData,
 		new expression.Bracket(
 			new expression.Call(
@@ -527,14 +526,14 @@ test("expression.parse - [] operator", function(){
 	);
 });
 
-test("Bracket expression", function(){
+test("Bracket expression", function() {
 	// ["bar"]
 	var expr = new expression.Bracket(
 		new expression.Literal("bar")
 	);
 	var compute = expr.value(
 		new Scope(
-			new CanMap({bar: "name"})
+			new CanMap({ bar: "name" })
 		)
 	);
 	equal(compute(), "name");
@@ -545,7 +544,7 @@ test("Bracket expression", function(){
 	);
 	compute = expr.value(
 		new Scope(
-			new CanMap({bar: "name", name: "Kevin"})
+			new CanMap({ bar: "name", name: "Kevin" })
 		)
 	);
 	equal(compute(), "Kevin");
@@ -557,7 +556,7 @@ test("Bracket expression", function(){
 	);
 	compute = expr.value(
 		new Scope(
-			new CanMap({foo: {bar: "name"}})
+			new CanMap({ foo: { bar: "name" } })
 		)
 	);
 	equal(compute(), "name");
@@ -567,7 +566,7 @@ test("Bracket expression", function(){
 		new expression.Lookup("bar"),
 		new expression.Lookup("foo")
 	);
-	var state = new CanMap({foo: {name: "Kevin"}, bar: "name"});
+	var state = new CanMap({ foo: { name: "Kevin" }, bar: "name" });
 	compute = expr.value(
 		new Scope(
 			state
@@ -588,7 +587,9 @@ test("Bracket expression", function(){
 	);
 	compute = expr.value(
 		new Scope(
-			new CanMap({foo: function() { return {name: "Kevin"}; }, bar: "name"})
+			new CanMap({ foo: function() {
+ return { name: "Kevin" };
+}, bar: "name" })
 		)
 	);
 	equal(compute(), "Kevin");
@@ -605,8 +606,10 @@ test("Bracket expression", function(){
 	compute = expr.value(
 		new Scope(
 			new CanMap({
-				foo: {name: "Kevin"},
-				bar: function () { return "name"; }
+				foo: { name: "Kevin" },
+				bar: function() {
+ return "name";
+}
 			})
 		)
 	);
@@ -628,8 +631,12 @@ test("Bracket expression", function(){
 	compute = expr.value(
 		new Scope(
 			new CanMap({
-				foo: function() { return {name: "Kevin"}; },
-				bar: function () { return "name"; }
+				foo: function() {
+ return { name: "Kevin" };
+},
+				bar: function() {
+ return "name";
+}
 			})
 		)
 	);
@@ -648,7 +655,9 @@ test("Bracket expression", function(){
 	compute = expr.value(
 		new Scope(
 			new CanMap({
-				foo: function(val) { return val + '!'; },
+				foo: function(val) {
+ return val + '!';
+},
 				bar: 'name',
 				name: 'Kevin'
 			})
@@ -657,7 +666,7 @@ test("Bracket expression", function(){
 	equal(compute(), "Kevin!");
 });
 
-test("registerConverter helpers push and pull correct values", function () {
+test("registerConverter helpers push and pull correct values", function() {
 
 	helpers.registerConverter('numberToHex', {
 		get: function(valCompute) {
@@ -670,8 +679,8 @@ test("registerConverter helpers push and pull correct values", function () {
 	var data = new CanMap({
 		observeVal: 255
 	});
-	var scope = new Scope( data );
-	var parentExpression = expression.parse("numberToHex(~observeVal)",{baseMethodType: "Call"});
+	var scope = new Scope(data);
+	var parentExpression = expression.parse("numberToHex(~observeVal)", { baseMethodType: "Call" });
 	var twoWayCompute = parentExpression.value(scope, new Scope.Options({}));
 	//twoWayCompute('34');
 
@@ -683,13 +692,13 @@ test("registerConverter helpers push and pull correct values", function () {
 	equal(data.attr("observeVal"), 127, 'push converter called');
 });
 
-test("registerConverter helpers push and pull multiple values", function () {
+test("registerConverter helpers push and pull multiple values", function() {
 
 	helpers.registerConverter('isInList', {
 		get: function(valCompute, list) {
 			return !!~list.indexOf(valCompute());
 		}, set: function(newVal, valCompute, list) {
-			if(!~list.indexOf(newVal)) {
+			if (!~list.indexOf(newVal)) {
 				list.push(newVal);
 			}
 		}
@@ -697,10 +706,10 @@ test("registerConverter helpers push and pull multiple values", function () {
 
 	var data = new CanMap({
 		observeVal: 4,
-		list: [1,2,3]
+		list: [ 1, 2, 3 ]
 	});
-	var scope = new Scope( data );
-	var parentExpression = expression.parse("isInList(~observeVal, list)",{baseMethodType: "Call"});
+	var scope = new Scope(data);
+	var parentExpression = expression.parse("isInList(~observeVal, list)", { baseMethodType: "Call" });
 	var twoWayCompute = parentExpression.value(scope, new Scope.Options({}));
 	//twoWayCompute('34');
 
@@ -709,11 +718,11 @@ test("registerConverter helpers push and pull multiple values", function () {
 
 	equal(twoWayCompute(), false, 'Converter called');
 	twoWayCompute(5);
-	deepEqual(data.attr("list").attr(), [1,2,3,5], 'push converter called');
+	deepEqual(data.attr("list").attr(), [ 1, 2, 3, 5 ], 'push converter called');
 });
 
 
-test("registerConverter helpers are chainable", function () {
+test("registerConverter helpers are chainable", function() {
 
 	helpers.registerConverter('numberToHex', {
 		get: function(valCompute) {
@@ -735,8 +744,8 @@ test("registerConverter helpers are chainable", function () {
 	var data = new CanMap({
 		observeVal: 255
 	});
-	var scope = new Scope( data );
-	var parentExpression = expression.parse("upperCase(~numberToHex(~observeVal))",{baseMethodType: "Call"});
+	var scope = new Scope(data);
+	var parentExpression = expression.parse("upperCase(~numberToHex(~observeVal))", { baseMethodType: "Call" });
 	var twoWayCompute = parentExpression.value(scope, new Scope.Options({}));
 	//twoWayCompute('34');
 
@@ -755,7 +764,7 @@ test('foo().bar', function() {
 	deepEqual(ast4, {
 		type: "Lookup",
 		key: "bar",
-		root: {type: "Call", method: {key: "@foo", type: "Lookup" } }
+		root: { type: "Call", method: { key: "@foo", type: "Lookup" } }
 	});
 
 	// expression.parse
@@ -763,18 +772,20 @@ test('foo().bar', function() {
 	deepEqual(exprData,
 		new expression.Lookup(
 			"bar",
-			new expression.Call( new expression.Lookup("@foo"), [], {} )
+			new expression.Call(new expression.Lookup("@foo"), [], {})
 		)
 	);
 
 	// expr.value
 	var expr = new expression.Lookup(
 		"bar",
-		new expression.Call( new expression.Lookup("@foo"), [], {} )
+		new expression.Call(new expression.Lookup("@foo"), [], {})
 	);
 	var compute = expr.value(
 		new Scope(
-			new CanMap({foo: function() { return {bar: "Kevin"}; }})
+			new CanMap({ foo: function() {
+ return { bar: "Kevin" };
+} })
 		)
 	);
 	equal(compute(), "Kevin");
@@ -785,8 +796,8 @@ test("Helper with a ~ key operator (#112)", function() {
 
 	var expected = {
 		type: "Helper",
-		method: {type: "Lookup", key: "each"},
-		children: [{type: "Arg", key: "~", children: [{type: "Lookup", key: "foo"} ]}]
+		method: { type: "Lookup", key: "each" },
+		children: [ { type: "Arg", key: "~", children: [ { type: "Lookup", key: "foo" } ] } ]
 	};
 
 	QUnit.deepEqual(ast, expected);
