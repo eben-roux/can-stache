@@ -260,12 +260,14 @@ var core = {
 			fullExpression = mode + expressionString;
 
 		// convert a lookup like `{{value}}` to still be called as a helper if necessary.
-		if (!(exprData instanceof expression.Helper) && !(exprData instanceof expression.Call)) {
+		if (!(exprData instanceof expression.Helper) &&
+			!(exprData instanceof expression.Call)
+		) {
 			exprData = new expression.Helper(exprData, [], {});
 		}
 
 		// A branching renderer takes truthy and falsey renderer.
-		return function branchRenderer(scope, options, truthyRenderer, falseyRenderer) {
+		var branchRenderer = function branchRenderer(scope, options, truthyRenderer, falseyRenderer) {
 			// Check the scope's cache if the evaluator already exists for performance.
 			var evaluator = scope.__cache[fullExpression];
 			if (mode || !evaluator) {
@@ -279,6 +281,10 @@ var core = {
 			var res = evaluator();
 			return res == null ? "" : "" + res;
 		};
+
+		branchRenderer.exprData = exprData;
+
+		return branchRenderer;
 	},
 	// ## mustacheCore.makeLiveBindingBranchRenderer
 	// Return a renderer function that evaluates the mustache expression and
@@ -307,7 +313,7 @@ var core = {
 			exprData = new expression.Helper(exprData, [], {});
 		}
 		// A branching renderer takes truthy and falsey renderer.
-		return function branchRenderer(scope, options, parentSectionNodeList, truthyRenderer, falseyRenderer) {
+		var branchRenderer = function branchRenderer(scope, options, parentSectionNodeList, truthyRenderer, falseyRenderer) {
 
 			var nodeList = [ this ];
 			nodeList.expression = expressionString;
@@ -385,6 +391,10 @@ var core = {
 			// Unbind the compute.
 			computeValue.computeInstance.unbind("change", k);
 		};
+
+		branchRenderer.exprData = exprData;
+
+		return branchRenderer;
 	},
 	// ## mustacheCore.splitModeFromExpression
 	// Returns the mustache mode split from the rest of the expression.
