@@ -51,6 +51,8 @@ function stache(template) {
 			// A stack of which node / section we are in.
 			// There is probably a better way of doing this.
 			sectionElementStack: [],
+			// A stack of which node / section type we are in
+			sectionElementTypeStack: [],
 			// If text should be inserted and HTML escaped
 			text: false,
 			// which namespace we are in
@@ -60,25 +62,31 @@ function stache(template) {
 			// when the element is done, we compile the text section and
 			// add it as a callback to `section`.
 			textContentOnly: null
-
 		},
+
 		// This function is a catch all for taking a section and figuring out
 		// how to create a "renderer" that handles the functionality for a
 		// given section and modify the section to use that renderer.
 		// For example, if an HTMLSection is passed with mode `#` it knows to
 		// create a liveBindingBranchRenderer and pass that to section.add.
 		makeRendererAndUpdateSection = function(section, mode, stache) {
-
 			if (mode === ">") {
+
 				// Partials use liveBindingPartialRenderers
 				section.add(mustacheCore.makeLiveBindingPartialRenderer(stache, copyState()));
 
 			} else if (mode === "/") {
 
-				section.endSection();
 				if (section instanceof HTMLSectionBuilder) {
+					var last = state.sectionElementTypeStack[state.sectionElementTypeStack.length - 1];
+					if (stache && stache !== last) {
+						console.warn(`unexpected closing tag {{/${stache}}} expected {{/${last}}}`);
+					}
+
 					state.sectionElementStack.pop();
+					state.sectionElementTypeStack.pop();
 				}
+
 			} else if (mode === "else") {
 
 				section.inverse();
@@ -92,10 +100,8 @@ function stache(template) {
 				// A StringBranchRenderer function processes the mustache text and returns a
 				// text value.
 				var makeRenderer = section instanceof HTMLSectionBuilder ?
-
 					mustacheCore.makeLiveBindingBranchRenderer :
 					mustacheCore.makeStringBranchRenderer;
-
 
 				if (mode === "{" || mode === "&") {
 
@@ -103,19 +109,28 @@ function stache(template) {
 					section.add(makeRenderer(null, stache, copyState()));
 
 				} else if (mode === "#" || mode === "^") {
+
 					// Adds a renderer function and starts a section.
 					section.startSection(makeRenderer(mode, stache, copyState()));
+
 					// If we are a directly nested section, count how many we are within
 					if (section instanceof HTMLSectionBuilder) {
 						state.sectionElementStack.push("section");
+
+						var parsed = mustacheCore.expression.parse(stache);
+						var type = parsed.key || parsed.methodExpr.key;
+						state.sectionElementTypeStack.push(type);
 					}
+
 				} else {
+
 					// Adds a renderer function that only updates text.
 					section.add(makeRenderer(null, stache, copyState({ text: true })));
-				}
 
+				}
 			}
 		},
+
 		// Copys the state object for use in renderers.
 		copyState = function(overwrites) {
 			var lastElement = state.sectionElementStack[state.sectionElementStack.length - 1];
@@ -129,6 +144,7 @@ function stache(template) {
 			};
 			return overwrites ? assign(cur, overwrites) : cur;
 		},
+
 		addAttributesCallback = function(node, callback) {
 			if (!node.attributes) {
 				node.attributes = [];
@@ -171,6 +187,7 @@ function stache(template) {
 				section.push(state.node);
 
 				state.sectionElementStack.push(isCustomTag ? 'custom' : tagName);
+				state.sectionElementTypeStack.push(isCustomTag ? 'custom' : tagName);
 
 				// If it's a custom tag with content, we need a section renderer.
 				if (isCustomTag) {
@@ -215,6 +232,7 @@ function stache(template) {
 				});
 			}
 			state.sectionElementStack.pop();
+			state.sectionElementTypeStack.pop();
 		},
 		attrStart: function(attrName) {
 			if (state.node.section) {
